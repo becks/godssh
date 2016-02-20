@@ -55,7 +55,7 @@ func prun(cmd string, k string, v string) {
 	fmt.Printf("[%s:%s -> %s]", k, v, cmd)
 	response, err := ssh.Run(cmd)
 	if err != nil {
-		panic("Can't run remote command: " + err.Error())
+		fmt.Println("Can't run remote command: " , err.Error())
 	} else {
 		fmt.Printf("\n\t%s", response)
 	}
@@ -71,7 +71,7 @@ func pscp(file string, destdir string, k string, v string) {
 	fmt.Printf("[%s:%s -> put %s]", k, v, file)
 	err := ssh.Scp(file, "/tmp/")
 	if err != nil {
-		panic("Can't upload" + err.Error())
+		fmt.Println("Can't upload" + err.Error())
 	} else {
 		fmt.Println("success")
 	}
