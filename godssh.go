@@ -6,7 +6,6 @@ import (
 	"github.com/becks/easyssh"
 	"io/ioutil"
 	"regexp"
-	"runtime"
 	"strings"
 )
 
@@ -79,23 +78,20 @@ func pscp(file string, destdir string, k string, v string) {
 
 func main() {
 
-	file := flag.String("file", "hosts.txt", "file hosts")
+	file := flag.String("file", "", "file hosts")
 	flag.Parse()
-	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	type Result struct {
 		response string
 		err      error
 	}
 
-	h := make(map[string]string)
-	h = hashhost(file)
+	h := hashhost(file)
 	for k, v := range h {
-
 		prun("uptime", k, v)
 		prun("who", k, v)
 		pscp("/home/becks/hosts_linux.txt", "/tmp/", k, v)
 		prun("ls -la /tmp/hosts_linux.txt", k, v)
-
 	}
 
 }
