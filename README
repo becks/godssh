@@ -1,0 +1,3 @@
+distribuites ssh.
+usage: godssh --file=/home/becks/hosts_linux.txt
+file is: ip hostame (like /etc/hosts)
