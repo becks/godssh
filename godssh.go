@@ -54,7 +54,7 @@ func prun(cmd string, k string, v string) {
 	fmt.Printf("[%s:%s -> %s]", k, v, cmd)
 	response, err := ssh.Run(cmd)
 	if err != nil {
-		fmt.Println("Can't run remote command: " , err.Error())
+		fmt.Println("Can't run remote command: ", err.Error())
 	} else {
 		fmt.Printf("\n%s", response)
 	}
