@@ -61,7 +61,7 @@ func prun(cmd string, k string, v string) {
 	}
 }
 
-func pscp(file string, k string, v string) {
+func pscp(file string, destdir string, k string, v string) {
 	ssh := &easyssh.MakeConfig{
 		User:   "becks",
 		Server: k,
@@ -93,7 +93,7 @@ func main() {
 
 		prun("uptime", k, v)
 		prun("who", k, v)
-		pscp("/home/becks/hosts_linux.txt", k, v)
+		pscp("/home/becks/hosts_linux.txt", "/tmp/", k, v)
 		prun("ls -la /tmp/hosts_linux.txt", k, v)
 
 	}
