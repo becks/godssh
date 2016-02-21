@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/becks/easyssh"
 	"io/ioutil"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -44,15 +45,9 @@ func hashhost(file *string) map[string]string {
 func init() {
 }
 
-func prun(cmd string, k string, v string) {
-	ssh := &easyssh.MakeConfig{
-		User:   "becks",
-		Server: k,
-		Key:    "/.ssh/id_rsa",
-		Port:   "22",
-	}
+func prun(ssh_conf *easyssh.MakeConfig, cmd string, k string, v string) {
 	fmt.Printf("[%s:%s -> %s]", k, v, cmd)
-	response, err := ssh.Run(cmd)
+	response, err := ssh_conf.Run(cmd)
 	if err != nil {
 		fmt.Println("Can't run remote command: ", err.Error())
 	} else {
@@ -60,19 +55,25 @@ func prun(cmd string, k string, v string) {
 	}
 }
 
-func pscp(file string, destdir string, k string, v string) {
-	ssh := &easyssh.MakeConfig{
-		User:   "becks",
-		Server: k,
-		Key:    "/.ssh/id_rsa",
-		Port:   "22",
-	}
-	fmt.Printf("[%s:%s -> put %s]", k, v, file)
-	err := ssh.Scp(file, destdir)
+func pscp(ssh_conf *easyssh.MakeConfig, file string, destdir string, k string, v string) {
+	fmt.Printf("[%s:%s -> put %s destdir: %s]", k, v, file, destdir)
+	ssh_conf.Tty = false
+	err := ssh_conf.Scp(file, destdir)
 	if err != nil {
-		fmt.Println("Can't upload" + err.Error())
+		fmt.Println(" Can't upload" + err.Error())
 	} else {
-		fmt.Println("success")
+		fmt.Println(" success")
+		prun(ssh_conf, fmt.Sprintf("ls -la %s/%s", destdir, filepath.Base(file)), k, v)
+	}
+}
+
+func prun_su(ssh_conf *easyssh.MakeConfig, cmd string, k string, v string) {
+	fmt.Printf("[%s:%s -> su -c %s]", k, v, cmd)
+	response, err := ssh_conf.Run(fmt.Sprintf("su -c \"%s\"", cmd))
+	if err != nil {
+		fmt.Println("Can't run remote command: ", err.Error())
+	} else {
+		fmt.Printf("\n%s", response)
 	}
 }
 
@@ -88,10 +89,19 @@ func main() {
 
 	h := hashhost(file)
 	for k, v := range h {
-		prun("uptime", k, v)
-		prun("who", k, v)
-		pscp("/home/becks/hosts_linux.txt", "/tmp/", k, v)
-		prun("ls -la /tmp/hosts_linux.txt", k, v)
+		ssh_conf := &easyssh.MakeConfig{
+			User:   "becks",
+			Server: k,
+			//Key:    "/.ssh/id_rsa",
+			Password: "XXXXXX",
+			Port:     "22",
+			Tty:      false,
+			//Shell: "/bin/bash",
+			Supassword: "YYYYYY",
+		}
+		prun(ssh_conf, "who", k, v)
+		prun_su(ssh_conf, "who", k, v)
+		pscp(ssh_conf, "/home/becks/hosts_linux.txt", "/tmp/", k, v)
 	}
 
 }
